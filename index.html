@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>365 — A Little Jar for Zi 🐰</title>
+<style>
+  :root{
+    --ink:#26324a;
+    --muted:#68738a;
+    --blue:#8db8ff;
+    --blue2:#dceaff;
+    --red:#ff9ba8;
+    --red2:#ffe0e5;
+    --white:rgba(255,255,255,.72);
+    --glass:rgba(255,255,255,.52);
+  }
+
+  *{box-sizing:border-box}
+  html{min-height:100%;background:#f8fbff} 
+  html,body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;color:var(--ink)}
+  body{
+    min-height:100svh;
+    overflow-x:hidden;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(141,184,255,.65), transparent 30%),
+      radial-gradient(circle at 85% 20%, rgba(255,155,168,.62), transparent 28%),
+      radial-gradient(circle at 50% 100%, rgba(185,218,255,.7), transparent 35%),
+      linear-gradient(135deg,#f8fbff,#fff7f8 48%,#eef6ff);
+    display:flex;justify-content:center;align-items:center;
+    padding:clamp(14px,3vw,28px) clamp(12px,3vw,24px);
+  }
+
+  body:before,body:after{
+    content:"";position:fixed;border-radius:50%;filter:blur(10px);pointer-events:none;z-index:-1;
+    animation:float 12s ease-in-out infinite alternate;
+  }
+  body:before{width:330px;height:330px;background:rgba(255,139,157,.23);left:-120px;top:28%}
+  body:after{width:380px;height:380px;background:rgba(103,161,255,.22);right:-150px;bottom:5%;animation-delay:-5s}
+  @keyframes float{to{transform:translate(55px,-35px) scale(1.12)}}
+
+  .app{
+    width:min(900px,100%);
+    min-height:min(720px,calc(100svh - 56px));
+    position:relative;
+    padding:clamp(22px,4vw,34px);
+    border:1px solid rgba(255,255,255,.85);
+    background:var(--glass);
+    backdrop-filter:blur(28px) saturate(140%);
+    -webkit-backdrop-filter:blur(28px) saturate(140%);
+    border-radius:34px;
+    box-shadow:0 30px 90px rgba(71,92,130,.18), inset 0 1px 0 white;
+    overflow:hidden;
+  }
+
+  .top{text-align:center;position:relative;z-index:2}
+  .eyebrow{font-size:.76rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#77839a}
+  h1{font-size:clamp(2.2rem,6vw,4rem);margin:8px 0 4px;letter-spacing:-.055em}
+
+  .main-quote{
+    margin:12px auto 2px;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(1.35rem,3.5vw,1.9rem);
+    font-style:italic;
+    font-weight:600;
+    letter-spacing:.02em;
+    color:#3d5279;
+  }
+  .translation{
+    color:#8993a6;
+    font-size:.78rem;
+    margin-bottom:9px;
+  }
+
+  .subtitle{margin:0 auto;color:var(--muted);max-width:580px;line-height:1.6;font-size:clamp(.9rem,2.1vw,1rem);padding:0 4px}
+  .subtitle b{color:#d85c70}
+
+  .jar-zone{display:flex;justify-content:center;align-items:center;min-height:clamp(330px,44vw,420px);position:relative}
+  .jar-glow{
+    position:absolute;width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(circle,rgba(135,180,255,.24),transparent 65%);
+    filter:blur(4px);
+  }
+
+  .jar{
+    width:245px;height:305px;position:relative;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .22s ease,filter .22s ease;
+    filter:drop-shadow(0 25px 20px rgba(70,91,130,.16));
+    animation:jarFloat 5s ease-in-out infinite;
+  }
+  .jar:hover{transform:translateY(-7px) rotate(-1deg)}
+  .jar:active{transform:scale(.97)}
+  @keyframes jarFloat{50%{translate:0 -7px}}
+
+  .lid{
+    position:absolute;top:10px;left:28px;width:189px;height:42px;border-radius:14px 14px 9px 9px;
+    background:linear-gradient(135deg,#a8c9ff,#7eaaff 55%,#9fc1ff);
+    border:2px solid rgba(255,255,255,.75);box-shadow:inset 0 3px 5px rgba(255,255,255,.7);
+    z-index:4;
+  }
+  .lid:after{content:"";position:absolute;left:18px;right:18px;bottom:-8px;height:12px;border-radius:0 0 9px 9px;background:#789fe9}
+  .glass{
+    position:absolute;left:17px;top:39px;width:211px;height:250px;
+    border-radius:40px 40px 62px 62px;
+    background:linear-gradient(115deg,rgba(255,255,255,.72),rgba(219,235,255,.30) 42%,rgba(255,221,227,.32));
+    border:3px solid rgba(255,255,255,.8);
+    box-shadow:inset 12px 0 20px rgba(255,255,255,.45),inset -10px -10px 30px rgba(126,170,255,.1);
+    overflow:hidden;
+  }
+  .glass:before{content:"";position:absolute;left:23px;top:18px;width:23px;height:180px;border-radius:50%;background:rgba(255,255,255,.5);filter:blur(2px)}
+  .paper{
+    position:absolute;width:43px;height:31px;border-radius:4px;
+    background:linear-gradient(135deg,#fff,#ffe7eb);box-shadow:0 3px 7px rgba(73,90,120,.14);
+    transform:rotate(var(--r));animation:paperBob var(--d) ease-in-out infinite alternate;
+  }
+  .paper:nth-child(1){left:23px;top:48px;--r:-12deg;--d:2.9s}
+  .paper:nth-child(2){left:82px;top:38px;--r:8deg;--d:3.4s;background:linear-gradient(135deg,#fff,#e7f0ff)}
+  .paper:nth-child(3){left:137px;top:67px;--r:-6deg;--d:2.6s}
+  .paper:nth-child(4){left:42px;top:108px;--r:17deg;--d:3.2s;background:#e8f2ff}
+  .paper:nth-child(5){left:106px;top:115px;--r:-18deg;--d:3.7s}
+  .paper:nth-child(6){left:155px;top:130px;--r:10deg;--d:2.8s;background:#e7f0ff}
+  .paper:nth-child(7){left:28px;top:168px;--r:6deg;--d:3.1s}
+  .paper:nth-child(8){left:91px;top:178px;--r:-9deg;--d:3.5s;background:#fff0f3}
+  .paper:nth-child(9){left:147px;top:190px;--r:14deg;--d:2.7s;background:#e9f2ff}
+  @keyframes paperBob{to{translate:0 -5px}}
+
+  .label{
+    position:absolute;z-index:3;left:42px;right:42px;top:115px;text-align:center;
+    padding:20px 10px;border-radius:22px;background:rgba(255,255,255,.68);
+    border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 25px rgba(72,94,130,.1);
+  }
+  .label .heart{font-size:1.45rem}
+  .label strong{display:block;font-size:1.15rem;margin-top:3px}
+  .label small{display:block;color:#7a8497;margin-top:4px}
+
+  .hint{text-align:center;color:#788399;font-size:.9rem;margin-top:-12px}
+  .draw{
+    display:block;margin:18px auto 0;border:0;border-radius:999px;padding:15px 27px;
+    -webkit-tap-highlight-color:transparent;
+    color:#fff;font-weight:750;font-size:1rem;cursor:pointer;
+    background:linear-gradient(100deg,#7faeff,#ff91a2);
+    box-shadow:0 12px 28px rgba(120,153,220,.3);
+    transition:transform .2s,box-shadow .2s;
+  }
+  .draw:hover{transform:translateY(-3px);box-shadow:0 17px 35px rgba(120,153,220,.36)}
+  .draw:active{transform:translateY(0) scale(.98)}
+
+  .counter{text-align:center;margin-top:15px;color:#8790a3;font-size:.82rem}
+  .counter span{font-weight:800;color:#56627a}
+
+  .daily-status{text-align:center;margin-top:8px;color:#8790a3;font-size:.8rem;font-weight:600}
+  .timer{text-align:center;margin-top:5px;color:#9aa3b4;font-size:.76rem;font-variant-numeric:tabular-nums}
+  .extra-controls{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:13px}
+  .secondary-btn,.skip-btn{border:0;background:transparent;color:#788399;cursor:pointer;font:inherit;transition:color .2s,transform .2s}
+  .secondary-btn{font-size:.8rem;font-weight:700;padding:6px 12px}
+  .skip-btn{font-size:.74rem;text-decoration:underline;text-underline-offset:3px;opacity:.72}
+  .secondary-btn:hover,.skip-btn:hover{color:#d86577;transform:translateY(-1px)}
+  .secondary-btn:disabled,.skip-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .locked .jar{cursor:not-allowed;filter:grayscale(.12) drop-shadow(0 25px 20px rgba(70,91,130,.13))}
+  .locked .jar:hover{transform:none}
+
+  .message-wrap{display:none;margin:20px auto 0;max-width:650px;perspective:1000px}
+  .message-wrap.show{display:block;animation:appear .5s ease both}
+  @keyframes appear{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+  .message{
+    background:rgba(255,255,255,.82);border:1px solid white;border-radius:28px;padding:29px 30px;
+    box-shadow:0 18px 50px rgba(77,93,125,.13);text-align:center;position:relative;overflow:hidden;
+  }
+  .message:before{content:"";position:absolute;width:160px;height:160px;right:-75px;top:-75px;border-radius:50%;background:rgba(141,184,255,.18)}
+  .message .tag{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:#8490a5;font-weight:800}
+  .message p{font-size:clamp(1.25rem,3vw,1.65rem);line-height:1.5;margin:13px 0 5px;font-weight:650;letter-spacing:-.02em}
+  .message .to{color:#d86577;font-weight:700;font-size:.86rem}
+
+  .footer{text-align:center;margin-top:27px;color:#9099aa;font-size:.74rem;padding-bottom:max(0px, env(safe-area-inset-bottom))}
+  .footer span{color:#dc7181}
+
+
+  @media(min-width:701px) and (max-width:1100px) and (orientation:portrait){
+    .app{min-height:auto}
+    .jar-zone{min-height:400px}
+  }
+
+  @media(hover:none){
+    .jar:hover{transform:none}
+    .draw:hover{transform:none;box-shadow:0 12px 28px rgba(120,153,220,.3)}
+    .secondary-btn:hover,.skip-btn:hover{transform:none}
+  }
+
+  .confetti{position:fixed;width:8px;height:12px;top:50%;left:50%;pointer-events:none;z-index:20;border-radius:3px;animation:confetti 900ms cubic-bezier(.1,.7,.2,1) forwards}
+  @keyframes confetti{to{transform:translate(var(--x),var(--y)) rotate(var(--rot));opacity:0}}
+
+  .shake{animation:shake .55s ease!important}
+  @keyframes shake{20%{transform:rotate(-5deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
+
+  @media(max-width:700px){
+    body{align-items:flex-start;padding:12px 10px max(12px,env(safe-area-inset-bottom))}
+    .app{width:100%;min-height:calc(100svh - 24px);padding:22px 14px;border-radius:24px}
+    .eyebrow{font-size:.68rem;letter-spacing:.14em}
+    h1{font-size:clamp(2rem,11vw,3rem);margin-top:6px}
+    .main-quote{font-size:clamp(1.25rem,6vw,1.7rem);margin-top:10px}
+    .translation{font-size:.74rem}
+    .subtitle{line-height:1.5;font-size:.9rem;max-width:520px}
+    .jar-zone{min-height:clamp(315px,68vw,370px);margin-top:-4px}
+    .jar{transform:scale(.84);transform-origin:center center}
+    .jar:hover{transform:scale(.84) translateY(-4px)}
+    .hint{font-size:.78rem;margin-top:-4px}
+    .draw{width:min(100%,300px);padding:14px 22px;margin-top:14px}
+    .counter{margin-top:13px}
+    .daily-status{margin-top:7px}
+    .extra-controls{margin-top:11px;gap:6px}
+    .message-wrap{margin-top:16px;max-width:100%}
+    .message{padding:22px 16px;border-radius:22px}
+    .message p{font-size:clamp(1.1rem,5.3vw,1.45rem);line-height:1.45}
+    .footer{margin-top:21px}
+  }
+
+  @media(min-width:701px) and (max-width:1024px){
+    .app{width:min(94vw,900px)}
+    .jar-zone{min-height:clamp(360px,42vw,420px)}
+  }
+
+  @media(max-width:700px) and (orientation:landscape){
+    body{padding-top:8px}
+    .app{min-height:auto;padding-top:18px;padding-bottom:18px}
+    .jar-zone{min-height:260px}
+    .jar{transform:scale(.68)}
+    .jar:hover{transform:scale(.68) translateY(-4px)}
+    .message-wrap{margin-top:12px}
+  }
+
+  .music-container{
+    position:fixed;
+    left:max(14px, env(safe-area-inset-left));
+    bottom:max(14px, env(safe-area-inset-bottom));
+    z-index:50;
+    width:min(260px, calc(100vw - 28px));
+    padding:8px;
+    border:1px solid rgba(255,255,255,.75);
+    background:rgba(255,255,255,.46);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    border-radius:16px;
+    box-shadow:0 12px 30px rgba(71,92,130,.16), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .music-container audio{
+    width:100%;
+    height:32px;
+    display:block;
+  }
+  @media(max-width:700px){
+    .music-container{
+      left:max(10px, env(safe-area-inset-left));
+      bottom:max(10px, env(safe-area-inset-bottom));
+      width:min(235px, calc(100vw - 20px));
+      padding:6px;
+      border-radius:14px;
+    }
+    .music-container audio{height:30px;}
+  }
+
+  .theme-toggle{
+    position:fixed;
+    right:max(14px, env(safe-area-inset-right));
+    bottom:max(14px, env(safe-area-inset-bottom));
+    z-index:60;
+    width:52px;
+    height:32px;
+    padding:0;
+    border:0;
+    border-radius:999px;
+    background:rgba(255,255,255,.48);
+    box-shadow:0 10px 25px rgba(71,92,130,.14), inset 0 1px 0 rgba(255,255,255,.8);
+    backdrop-filter:blur(16px) saturate(140%);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .25s ease, box-shadow .25s ease;
+  }
+  .theme-toggle:before{
+    content:"";
+    position:absolute;
+    top:4px;
+    left:4px;
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 2px 7px rgba(60,70,90,.2);
+    transition:transform .25s ease;
+  }
+  .theme-toggle:after{
+    content:"☼";
+    position:absolute;
+    left:0;
+    right:0;
+    top:5px;
+    text-align:right;
+    padding-right:8px;
+    font-size:14px;
+    line-height:22px;
+    color:#68738a;
+    transition:color .25s ease;
+  }
+  .theme-toggle[aria-checked="true"]{
+    background:rgba(70,76,92,.82);
+    box-shadow:0 10px 25px rgba(20,24,32,.22), inset 0 1px 0 rgba(255,255,255,.12);
+  }
+  .theme-toggle[aria-checked="true"]:before{transform:translateX(20px);background:#1f2430}
+  .theme-toggle[aria-checked="true"]:after{content:"☾";color:#dce2ef;padding-right:31px;text-align:left}
+  .theme-toggle:focus-visible{outline:2px solid rgba(127,174,255,.9);outline-offset:3px}
+
+  body.dark{
+    --ink:#eef2f8;
+    --muted:#b5bfce;
+    --blue:#8db8ff;
+    --blue2:#26354e;
+    --red:#ff9ba8;
+    --red2:#4b2e35;
+    --white:rgba(34,39,50,.72);
+    --glass:rgba(28,33,44,.56);
+    background:
+      radial-gradient(circle at 15% 15%, rgba(80,122,204,.36), transparent 30%),
+      radial-gradient(circle at 85% 20%, rgba(192,82,102,.30), transparent 28%),
+      radial-gradient(circle at 50% 100%, rgba(70,100,150,.34), transparent 35%),
+      linear-gradient(135deg,#11151d,#17131a 48%,#101722);
+  }
+  body.dark .app{
+    border-color:rgba(255,255,255,.12);
+    box-shadow:0 30px 90px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  body.dark .eyebrow,
+  body.dark .daily-status,
+  body.dark .timer,
+  body.dark .counter,
+  body.dark .hint,
+  body.dark .footer,
+  body.dark .translation{color:#9ea9ba}
+  body.dark .main-quote{color:#b8cdf8}
+  body.dark .message{
+    background:rgba(30,35,47,.82);
+    border-color:rgba(255,255,255,.10);
+    box-shadow:0 18px 50px rgba(0,0,0,.24);
+  }
+  body.dark .label{
+    background:rgba(30,35,47,.68);
+    border-color:rgba(255,255,255,.13);
+    box-shadow:0 10px 25px rgba(0,0,0,.18);
+  }
+  body.dark .paper{box-shadow:0 3px 7px rgba(0,0,0,.25)}
+  body.dark .paper:nth-child(2),
+  body.dark .paper:nth-child(4),
+  body.dark .paper:nth-child(6),
+  body.dark .paper:nth-child(9){filter:brightness(.86)}
+  body.dark .music-container{
+    background:rgba(30,35,47,.56);
+    border-color:rgba(255,255,255,.13);
+    box-shadow:0 12px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.10);
+  }
+  body.dark .secondary-btn,
+  body.dark .skip-btn{color:#aab4c4}
+  body.dark .secondary-btn:hover,
+  body.dark .skip-btn:hover{color:#ff9aaa}
+
+  @media(max-width:700px){
+    .theme-toggle{
+      right:max(10px, env(safe-area-inset-right));
+      bottom:max(10px, env(safe-area-inset-bottom));
+    }
+  }
+</style>
+</head>
+<body>
+<!-- Music Player Widget -->
+<div class="music-container">
+    <audio id="bgMusic" controls loop preload="auto">
+        <source src="https://files.catbox.moe/e69weq.mp3" type="audio/mp3">
+    </audio>
+</div>
+
+<button class="theme-toggle" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Turn on dark mode"></button>
+
+<main class="app">
+  <section class="top">
+    <div class="eyebrow">365 little reminders</div>
+    <h1>For Zi 🐰</h1>
+    <div class="main-quote">Dum spiro spero</div>
+    <div class="translation">“While I breathe, I hope.”</div>
+    <p class="subtitle">A little jar of compliments, encouragement, and reminders for <b>Franzine</b>.<br>Pull one whenever you need a tiny reminder, a compliment, or a distraction.</p>
+  </section>
+
+  <section class="jar-zone">
+    <div class="jar-glow"></div>
+    <div class="jar" id="jar" title="Click the jar">
+      <div class="lid"></div>
+      <div class="glass">
+        <div class="paper"></div><div class="paper"></div><div class="paper"></div>
+        <div class="paper"></div><div class="paper"></div><div class="paper"></div>
+        <div class="paper"></div><div class="paper"></div><div class="paper"></div>
+      </div>
+      <div class="label"><div class="heart">♡</div><strong>365 for Zi</strong><small>one little note a day</small></div>
+    </div>
+  </section>
+
+  <div class="hint">tap the jar or press the button</div>
+  <button class="draw" id="draw">Pull a little note ✨</button>
+  <div class="counter">Notes discovered <span id="count">0</span> / 365</div>
+  <div class="daily-status" id="dailyStatus">One note every hour ♡</div>
+  <div class="timer" id="timer">Ready for a note ✨</div>
+  <div class="extra-controls">
+    <button class="secondary-btn" id="refreshJar" type="button">↻ Refresh jar</button>
+    <button class="skip-btn" id="skipTimer" type="button">You need more? Click here to skip the timer</button>
+  </div>
+
+  <section class="message-wrap" id="messageWrap">
+    <div class="message">
+      <div class="tag" id="tag">today's little reminder</div>
+      <p id="message"></p>
+      <div class="to">for Zi c:</div>
+    </div>
+  </section>
+
+  <div class="footer">made by ray for zi :)</div>
+</main>
+
+<script>
+const compliments = [
+  "You have a really nice energy about you.",
+  "You make conversations more fun than they need to be.",
+  "You have a good sense of humor.",
+  "You're genuinely easy to appreciate.",
+  "You have a way of making people feel comfortable.",
+  "You notice little things that other people might miss.",
+  "You have your own style, and it suits you.",
+  "You're a pretty interesting person, Bunny.",
+  "You have more good qualities than you probably notice.",
+  "You make ordinary moments a little less boring.",
+  "You're someone people can actually enjoy being around.",
+  "You have a really nice laugh.",
+  "You're more capable than you sometimes give yourself credit for.",
+  "You have a good heart without making a big deal about it.",
+  "You're pretty cool. Don't let this note inflate your ego.",
+  "You have a personality that's hard to forget.",
+  "You have a nice way of looking at things.",
+  "You're doing more right than you think.",
+  "You're a good person to have around.",
+  "You have a lot going for you, Zi.",
+  "You're allowed to recognize your own progress.",
+  "You have qualities that make you stand out in a good way.",
+  "You're actually pretty awesome. Unfortunately, the jar has spoken.",
+  "You're someone worth rooting for.",
+  "You bring a good vibe wherever you go.",
+  "You have a lot more potential than you realize.",
+  "You're pretty easy to cheer for.",
+  "You have a good balance of chaos and charm.",
+  "You make being yourself work surprisingly well.",
+  "You're doing okay, Bunny. Probably better than okay."
+];
+
+const motivation = [
+  "Take it one thing at a time. You don't have to solve everything today.",
+  "Small progress still counts.",
+  "You don't have to be productive every second of the day.",
+  "If today is a rough day, that's okay. Tomorrow gets a turn too.",
+  "You can take a break without feeling guilty about it.",
+  "Don't compare your behind-the-scenes to someone else's highlight reel.",
+  "You don't have to have everything figured out yet.",
+  "One bad day doesn't erase all the progress you've made.",
+  "Keep going at your own pace.",
+  "You can do something badly before you learn to do it well.",
+  "It's okay to start over.",
+  "Focus on the next small step instead of the entire staircase.",
+  "You are allowed to change your mind and try again.",
+  "Some days are for getting things done. Some days are for surviving. Both count.",
+  "Don't be too hard on yourself.",
+  "You've handled difficult things before. You can handle the next thing too.",
+  "Rest now. Future-you will appreciate it.",
+  "You don't need permission to take care of yourself.",
+  "Progress isn't always obvious while you're making it.",
+  "Keep showing up. That's already something.",
+  "You can pause without giving up.",
+  "Don't let one mistake convince you that you're bad at everything.",
+  "You're allowed to figure things out as you go.",
+  "Breathe. Drink some water. Then deal with the problem.",
+  "You've got more time than your stress is telling you.",
+  "Do what you can today. That's enough for today.",
+  "Your pace doesn't have to match anyone else's.",
+  "It's okay if things aren't perfect.",
+  "Give yourself some credit for making it this far.",
+  "Whatever you're working through, take it one step at a time."
+];
+
+const bunny = [
+  "Bunny reminder: drink some water.",
+  "Zi, this is your official reminder to unclench your jaw.",
+  "Bunny, please stop overthinking for approximately five minutes.",
+  "Zi.exe needs a reboot. Go take a break.",
+  "Today's assignment: survive, hydrate, and don't stress yourself out.",
+  "Bunny check-in. You good? If not, that's okay too.",
+  "Reminder from the jar: you don't have to do everything right now.",
+  "Zi, go stretch. Your future back will appreciate it.",
+  "Bunny, one thing at a time. We're not speedrunning life.",
+  "If nobody has told you today, you're doing alright.",
+  "Zi, please remember that sleep is not optional DLC.",
+  "Bunny, take the small win. We'll take the big ones later.",
+  "This note has no profound meaning. It just wanted to say hi.",
+  "Emergency Bunny reminder: breathe.",
+  "Zi, today's vibe is: don't make things harder than they need to be.",
+  "You have officially been reminded to be a little nicer to yourself.",
+  "Bunny, whatever you're stressing about probably deserves a snack break.",
+  "Congratulations. You found another note instead of doing whatever you were supposed to do.",
+  "Zi, consider this a tiny high-five from the jar.",
+  "Bunny, you're allowed to have a lazy day.",
+  "Reminder: being tired is not a personality flaw.",
+  "Zi, please stop arguing with your own brain for five minutes.",
+  "Bunny, you're doing fine. Source: this extremely trustworthy jar.",
+  "Today's motivational speech is simply: you got this.",
+  "Zi, take a breath. The world can wait a minute.",
+  "Bunny, go do one nice thing for yourself today.",
+  "This jar believes in you. The jar has excellent judgment.",
+  "Zi, don't forget to enjoy the little things too.",
+  "Bunny reminder: you don't have to make every day productive.",
+  "Okay Zi, that's enough stressing. Go get some peace and quiet."
+];
+
+const notes = [];
+for (let i = 0; i < 365; i++) {
+  if (i === 364) {
+    notes.push("Zi, you made it through all 365. No dramatic speech. Just take the win. ♡");
+  } else {
+    const group = i % 4;
+    if (group === 0 || group === 1) {
+      notes.push(motivation[Math.floor(i / 4) % motivation.length]);
+    } else if (group === 2) {
+      notes.push(compliments[Math.floor(i / 4) % compliments.length]);
+    } else {
+      notes.push(bunny[Math.floor(i / 4) % bunny.length]);
+    }
+  }
+}
+
+const jar = document.getElementById("jar");
+const drawButton = document.getElementById("draw");
+const wrap = document.getElementById("messageWrap");
+const message = document.getElementById("message");
+const tag = document.getElementById("tag");
+const count = document.getElementById("count");
+const dailyStatus = document.getElementById("dailyStatus");
+const timer = document.getElementById("timer");
+const refreshJar = document.getElementById("refreshJar");
+const skipTimer = document.getElementById("skipTimer");
+
+const DRAW_KEY = "ziJarDrawn";
+const TIMER_KEY = "ziJarLastDrawTime";
+const HOUR_MS = 60 * 60 * 1000;
+
+let drawn = new Set();
+let lastDrawTime = 0;
+
+try {
+  const saved = JSON.parse(localStorage.getItem(DRAW_KEY));
+  if (Array.isArray(saved)) {
+    drawn = new Set(saved.filter(n => Number.isInteger(n) && n >= 0 && n < 365));
+  }
+  lastDrawTime = Number(localStorage.getItem(TIMER_KEY)) || 0;
+} catch (error) {
+  console.warn("Could not read saved jar data.", error);
+}
+
+function remainingMs() {
+  if (!lastDrawTime) return 0;
+  return Math.max(0, HOUR_MS - (Date.now() - lastDrawTime));
+}
+
+function timerLocked() {
+  return remainingMs() > 0;
+}
+
+function formatTime(ms) {
+  const totalSeconds = Math.ceil(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}h ${String(minutes).padStart(2,"0")}m`;
+  return `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+}
+
+function updateCount() {
+  count.textContent = drawn.size;
+}
+
+function updateDailyUI() {
+  const locked = timerLocked();
+
+  if (drawn.size >= 365) {
+    dailyStatus.textContent = "All 365 notes discovered ♡";
+    timer.textContent = "The jar is complete ✨";
+    drawButton.textContent = "The jar is empty ✨";
+    drawButton.disabled = true;
+    jar.classList.add("locked");
+    skipTimer.disabled = true;
+  } else if (locked) {
+    dailyStatus.textContent = "Next note available in ♡";
+    timer.textContent = formatTime(remainingMs());
+    drawButton.textContent = "Wait a little ✨";
+    drawButton.disabled = true;
+    jar.classList.add("locked");
+    skipTimer.disabled = false;
+  } else {
+    dailyStatus.textContent = "One note every hour ♡";
+    timer.textContent = "Ready for a note ✨";
+    drawButton.textContent = "Pull a little note ✨";
+    drawButton.disabled = false;
+    jar.classList.remove("locked");
+    skipTimer.disabled = false;
+  }
+}
+
+function burst() {
+  const symbols = ["♡", "✦", "•", "✧"];
+  for (let i = 0; i < 18; i++) {
+    const particle = document.createElement("span");
+    particle.className = "confetti";
+    particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    particle.style.setProperty("--x", `${Math.random() * 360 - 180}px`);
+    particle.style.setProperty("--y", `${Math.random() * 300 - 170}px`);
+    particle.style.setProperty("--rot", `${Math.random() * 720 - 360}deg`);
+    particle.style.fontSize = `${10 + Math.random() * 12}px`;
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 950);
+  }
+}
+
+function showMessage(text, type) {
+  message.textContent = text;
+  tag.textContent = type;
+  wrap.classList.remove("show");
+  void wrap.offsetWidth;
+  wrap.classList.add("show");
+
+  jar.classList.remove("shake");
+  void jar.offsetWidth;
+  jar.classList.add("shake");
+  burst();
+}
+
+function saveProgress() {
+  try {
+    localStorage.setItem(DRAW_KEY, JSON.stringify([...drawn]));
+    if (lastDrawTime) localStorage.setItem(TIMER_KEY, String(lastDrawTime));
+    else localStorage.removeItem(TIMER_KEY);
+  } catch (error) {
+    console.warn("Could not save jar progress.", error);
+  }
+}
+
+function pullNote(force = false) {
+  if (!force && timerLocked()) {
+    updateDailyUI();
+    showMessage(
+      `Your next note is in ${formatTime(remainingMs())}. Or use the skip button if you need more.`,
+      "timer running"
+    );
+    return;
+  }
+
+  if (drawn.size >= 365) {
+    showMessage(
+      "You found all 365 notes. Refresh the jar to start a new round.",
+      "you made it"
+    );
+    updateDailyUI();
+    return;
+  }
+
+  const available = [];
+  for (let i = 0; i < 365; i++) {
+    if (!drawn.has(i)) available.push(i);
+  }
+
+  const index = available[Math.floor(Math.random() * available.length)];
+  drawn.add(index);
+  lastDrawTime = Date.now();
+  saveProgress();
+
+  let type = "a little Bunny note";
+  if (index === 364) type = "the last little note";
+  else if (index % 4 === 0 || index % 4 === 1) type = "a little motivation";
+  else if (index % 4 === 2) type = "a little compliment";
+
+  showMessage(notes[index], type);
+  updateCount();
+  updateDailyUI();
+}
+
+function skipDailyTimer() {
+  if (drawn.size >= 365) return;
+
+  const confirmed = confirm(
+    "Need extra motivation right now? This resets the timer to 0 and starts a fresh one-hour wait after the new note."
+  );
+
+  if (!confirmed) return;
+
+  lastDrawTime = 0;
+  saveProgress();
+  pullNote(true);
+}
+
+function refreshTheJar() {
+  const confirmed = confirm(
+    "Refresh the jar? This will reset all 365 discovered notes and start the jar over."
+  );
+
+  if (!confirmed) return;
+
+  drawn = new Set();
+  lastDrawTime = 0;
+  saveProgress();
+
+  message.textContent = "";
+  wrap.classList.remove("show");
+  updateCount();
+  updateDailyUI();
+  showMessage("The jar is fresh again. 365 new notes are waiting.", "fresh jar");
+}
+
+drawButton.addEventListener("click", () => pullNote(false));
+jar.addEventListener("click", () => pullNote(false));
+skipTimer.addEventListener("click", skipDailyTimer);
+refreshJar.addEventListener("click", refreshTheJar);
+
+setInterval(updateDailyUI, 1000);
+updateCount();
+updateDailyUI();
+
+
+// Start background music after the visitor's first interaction anywhere on the page.
+// Browsers, especially iPhone/iPad Safari, block autoplay until the user interacts.
+const bgMusic = document.getElementById("bgMusic");
+if (bgMusic) bgMusic.volume = 0.10;
+let musicStarted = false;
+
+function startBackgroundMusic() {
+  if (!bgMusic || musicStarted) return;
+
+  const playPromise = bgMusic.play();
+  if (playPromise && typeof playPromise.then === "function") {
+    playPromise.then(() => {
+      musicStarted = true;
+    }).catch(() => {
+      // If playback is blocked, keep listening so the next interaction can try again.
+    });
+  } else {
+    musicStarted = true;
+  }
+}
+
+document.addEventListener("pointerdown", startBackgroundMusic, { passive: true });
+document.addEventListener("keydown", startBackgroundMusic, { passive: true });
+
+
+// Minimal iOS-style dark mode toggle.
+const themeToggle = document.getElementById("themeToggle");
+const THEME_KEY = "ziJarDarkMode";
+
+function applyTheme(isDark) {
+  document.body.classList.toggle("dark", isDark);
+  themeToggle.setAttribute("aria-checked", String(isDark));
+  themeToggle.setAttribute("aria-label", isDark ? "Turn off dark mode" : "Turn on dark mode");
+}
+
+let savedTheme = false;
+try {
+  savedTheme = localStorage.getItem(THEME_KEY) === "true";
+} catch (error) {
+  savedTheme = false;
+}
+applyTheme(savedTheme);
+
+themeToggle.addEventListener("click", () => {
+  const isDark = !document.body.classList.contains("dark");
+  applyTheme(isDark);
+  try {
+    localStorage.setItem(THEME_KEY, String(isDark));
+  } catch (error) {
+    console.warn("Could not save dark mode preference.", error);
+  }
+});
+</script>
+</body>
+</html>
